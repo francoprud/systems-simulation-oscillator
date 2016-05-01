@@ -1,5 +1,8 @@
 package simulation;
 
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+
 public class GearPredictorCorrectorSimulation extends Simulation {
 	public static final int[] FACTORIAL = { 1, 1, 2, 6, 24, 120 };
 	public static final double[] ALPHA = { 3.0 / 20.0, 251.0 / 360.0, 1.0,
@@ -12,7 +15,9 @@ public class GearPredictorCorrectorSimulation extends Simulation {
 				initialVelocity);
 	}
 
-	public void simulate() {
+	public void simulate() throws FileNotFoundException {
+		PrintWriter writer = new PrintWriter("doc/examples/GPCSimulation.csv");
+		writer.println("t, r, error");
 		double[] initialPositions = getInitialPositions(initialPosition,
 				initialVelocity, mass, k, gamma);
 		double deltaTimePow2 = Math.pow(deltaTime, 2);
@@ -20,13 +25,16 @@ public class GearPredictorCorrectorSimulation extends Simulation {
 		int steps = 0;
 
 		for (double t = 0; t <= finalTime; t += deltaTime) {
-			error += getError(initialPositions[0], t);
-
+			double stepError = getError(initialPositions[0], t);
+			error += stepError;
+			
+			writer.println(t + ", " + initialPositions[0] + ", " + stepError);
+			
 			double[] predictedPosition = predictPosition(initialPositions,
 					deltaTime);
 
 			double deltaAcceleration = calculateAcceleration(
-					initialPositions[0], initialPositions[1], mass, k, gamma)
+					initialPositions[0], initialPositions[1], k, gamma, mass)
 					- predictedPosition[2];
 			double deltaR2 = deltaAcceleration * deltaTimePow2 / 2;
 
@@ -37,7 +45,7 @@ public class GearPredictorCorrectorSimulation extends Simulation {
 
 			steps++;
 		}
-
+		writer.close();
 		System.out.println("Error: " + error / steps);
 	}
 
@@ -65,7 +73,6 @@ public class GearPredictorCorrectorSimulation extends Simulation {
 		double deltaTimePow4 = Math.pow(deltaTime, 4);
 		double deltaTimePow5 = Math.pow(deltaTime, 5);
 
-		predictedPositions[5] = r[5];
 		predictedPositions[5] = r[5];
 		predictedPositions[4] = r[4] + r[5] * deltaTime;
 		predictedPositions[3] = r[3] + r[4] * deltaTime + r[5] * deltaTimePow2

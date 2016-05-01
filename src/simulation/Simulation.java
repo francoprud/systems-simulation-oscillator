@@ -1,5 +1,7 @@
 package simulation;
 
+import java.io.FileNotFoundException;
+
 public abstract class Simulation {
 	protected double mass;
 	protected double k;
@@ -20,12 +22,12 @@ public abstract class Simulation {
 		this.initialVelocity = initialVelocity;
 	}
 
-	public abstract void simulate();
+	public abstract void simulate() throws FileNotFoundException;
 
 	public double expectedPosition(double time) {
-		return Math.exp(-(gamma / (2 * mass) * time)
+		return Math.exp(-(gamma * time) / (2 * mass))
 				* Math.cos(Math.pow(k / mass - Math.pow(gamma / (2 * mass), 2),
-						0.5) * time));
+						0.5) * time);
 	}
 
 	public double getError(double position, double time) {
